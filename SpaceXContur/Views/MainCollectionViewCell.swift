@@ -11,54 +11,47 @@ class MainCollectionViewCell: UICollectionViewCell, UITableViewDataSource, UITab
     
     static let identifier = "MainCollectionViewCell"
     
-    private let tableView: UITableView = {
-        let table = UITableView(frame: .zero, style: .plain)
-        table.register(DataTableViewCell.self, forCellReuseIdentifier: DataTableViewCell.identifier)
-        table.translatesAutoresizingMaskIntoConstraints = false
-        return table
+    weak var delegate: MainCollectionViewCellDelegate?
+    
+    var tableView: UITableView = {
+        let tableView = UITableView()
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        return tableView
     }()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        contentView.addSubview(tableView)
-        contentView.backgroundColor = .systemPink
-        tableView.backgroundColor = .systemRed
-        tableView.dataSource = self
+        addSubview(tableView)
+        tableView.isScrollEnabled = false
+        NSLayoutConstraint.activate([
+            tableView.topAnchor.constraint(equalTo: topAnchor),
+            tableView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            tableView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: trailingAnchor),
+        ])
+        
         tableView.delegate = self
-
-        setupConstraints()
+        tableView.dataSource = self
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private func setupConstraints() {
-        NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            tableView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
-        ])
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 20
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        cell.textLabel?.text = "Cell \(indexPath.row)"
+        return cell
     }
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        contentView.layer.cornerRadius = 12
-        contentView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        delegate?.updateHeightOfRow(self, tableView)
     }
     
-    func numberOfSections(in tableView: UITableView) -> Int {
-        return 3
-    }
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 10
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: DataTableViewCell.identifier, for: indexPath) as! DataTableViewCell
-        cell.configure(with: ["Description", "Value"])
-        return cell
-    }
 }
