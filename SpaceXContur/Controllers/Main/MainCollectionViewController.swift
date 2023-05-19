@@ -23,6 +23,13 @@ class MainCollectionViewController: UIViewController, UICollectionViewDelegate, 
         return imageView
     }()
     
+    var scrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.backgroundColor = .clear
+        return scrollView
+    }()
+    
     var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
@@ -32,17 +39,6 @@ class MainCollectionViewController: UIViewController, UICollectionViewDelegate, 
         collectionView.backgroundColor = .clear
         return collectionView
     }()
-    
-    
-    
-    var scrollView: UIScrollView = {
-        let scrollView = UIScrollView()
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.backgroundColor = .clear
-        return scrollView
-    }()
-    
-    // ... (omitted for brevity)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -69,7 +65,6 @@ class MainCollectionViewController: UIViewController, UICollectionViewDelegate, 
             scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             
             collectionView.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: view.frame.height / 2),
-            collectionView.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor),
             collectionView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
             collectionView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
@@ -97,6 +92,9 @@ class MainCollectionViewController: UIViewController, UICollectionViewDelegate, 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MainCollectionViewCell.identifier, for: indexPath) as! MainCollectionViewCell
         cell.delegate = self
+//        cell.backgroundColor = .systemPink
+//        cell.layer.cornerRadius = 14
+//        cell.layer.cornerCurve = .continuous
         return cell
     }
     
