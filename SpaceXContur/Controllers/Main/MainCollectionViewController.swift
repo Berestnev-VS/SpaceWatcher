@@ -5,16 +5,9 @@
 //  Created by Владимир on 17.05.2023.
 //
 
-//
-//  ViewController.swift
-//  SpaceXContur
-//
-//  Created by Владимир on 17.05.2023.
-//
-
 import UIKit
 
-class MainCollectionViewController: UIViewController, UIScrollViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, MainCollectionViewCellDelegate {
+class MainCollectionViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, MainCollectionViewCellDelegate {
     
     override var prefersStatusBarHidden: Bool { 
         return true
@@ -26,20 +19,13 @@ class MainCollectionViewController: UIViewController, UIScrollViewDelegate, UICo
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.image = UIImage(named: "falcon")
+        imageView.contentMode = .scaleAspectFill // added this line to make image fit the imageView
         return imageView
-    }()
-    
-    var scrollView: UIScrollView = {
-        let scrollView = UIScrollView()
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.backgroundColor = .red
-        return scrollView
     }()
     
     var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
-//        layout.sectionInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.register(MainCollectionViewCell.self, forCellWithReuseIdentifier: MainCollectionViewCell.identifier)
@@ -47,13 +33,24 @@ class MainCollectionViewController: UIViewController, UIScrollViewDelegate, UICo
         return collectionView
     }()
     
+    
+    
+    var scrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.backgroundColor = .clear
+        return scrollView
+    }()
+    
+    // ... (omitted for brevity)
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         collectionView.delegate = self
         collectionView.dataSource = self
+        view.addSubview(imageView)
         view.addSubview(scrollView)
-        scrollView.addSubview(imageView)
         scrollView.addSubview(collectionView)
         
         setupConstraints()
@@ -61,18 +58,18 @@ class MainCollectionViewController: UIViewController, UIScrollViewDelegate, UICo
     
     func setupConstraints() {
         NSLayoutConstraint.activate([
+            imageView.topAnchor.constraint(equalTo: view.topAnchor),
+            imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            imageView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
             scrollView.topAnchor.constraint(equalTo: view.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             
-            imageView.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            imageView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
-            imageView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
-            imageView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
-            imageView.heightAnchor.constraint(equalToConstant: view.frame.height),
-            
-            collectionView.topAnchor.constraint(equalTo: imageView.centerYAnchor),
+            collectionView.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: view.frame.height / 2),
+            collectionView.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor),
             collectionView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
             collectionView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
@@ -83,13 +80,14 @@ class MainCollectionViewController: UIViewController, UIScrollViewDelegate, UICo
         collectionViewHeightConstraint?.isActive = true
     }
     
+    
     func updateHeightOfRow(_ cell: MainCollectionViewCell, _ tableView: UITableView) {
-//        let size = cell.tableView.contentSize
-//        let height = size.height > 0 ? size.height : 1000
-        collectionViewHeightConstraint?.constant = cell.tableView.contentSize.height
+        let height = cell.tableView.contentSize.height
+        collectionViewHeightConstraint?.constant = height
         collectionView.collectionViewLayout.invalidateLayout()
-        scrollView.contentSize = CGSize(width: view.frame.width, height: imageView.frame.height / 2 + (collectionViewHeightConstraint?.constant ?? 0))
+        scrollView.contentSize = CGSize(width: view.frame.width, height: view.frame.height / 2 + height)
     }
+
     
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
