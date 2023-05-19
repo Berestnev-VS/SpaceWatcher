@@ -7,6 +7,10 @@
 
 import UIKit
 
+protocol MainCollectionViewCellDelegate: AnyObject {
+    func updateHeightOfRow(_ cell: MainCollectionViewCell, _ tableView: UITableView)
+}
+
 class MainCollectionViewCell: UICollectionViewCell, UITableViewDataSource, UITableViewDelegate {
     
     static let identifier = "MainCollectionViewCell"

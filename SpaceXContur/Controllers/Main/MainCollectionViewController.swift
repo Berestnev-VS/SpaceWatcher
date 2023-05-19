@@ -14,11 +14,13 @@
 
 import UIKit
 
-protocol MainCollectionViewCellDelegate: AnyObject {
-    func updateHeightOfRow(_ cell: MainCollectionViewCell, _ tableView: UITableView)
-}
-
 class MainCollectionViewController: UIViewController, UIScrollViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, MainCollectionViewCellDelegate {
+    
+    override var prefersStatusBarHidden: Bool { 
+        return true
+    }
+    
+    var collectionViewHeightConstraint: NSLayoutConstraint?
     
     var imageView: UIImageView = {
         let imageView = UIImageView()
@@ -30,22 +32,20 @@ class MainCollectionViewController: UIViewController, UIScrollViewDelegate, UICo
     var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.backgroundColor = .white
+        scrollView.backgroundColor = .red
         return scrollView
     }()
     
     var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
-        layout.sectionInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+//        layout.sectionInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.register(MainCollectionViewCell.self, forCellWithReuseIdentifier: MainCollectionViewCell.identifier)
         collectionView.backgroundColor = .clear
         return collectionView
     }()
-    
-    var collectionViewHeightConstraint: NSLayoutConstraint?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -70,9 +70,9 @@ class MainCollectionViewController: UIViewController, UIScrollViewDelegate, UICo
             imageView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
             imageView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
             imageView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
-            imageView.heightAnchor.constraint(equalToConstant: view.frame.height / 2),
+            imageView.heightAnchor.constraint(equalToConstant: view.frame.height),
             
-            collectionView.topAnchor.constraint(equalTo: imageView.bottomAnchor),
+            collectionView.topAnchor.constraint(equalTo: imageView.centerYAnchor),
             collectionView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
             collectionView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
@@ -83,8 +83,17 @@ class MainCollectionViewController: UIViewController, UIScrollViewDelegate, UICo
         collectionViewHeightConstraint?.isActive = true
     }
     
+    func updateHeightOfRow(_ cell: MainCollectionViewCell, _ tableView: UITableView) {
+//        let size = cell.tableView.contentSize
+//        let height = size.height > 0 ? size.height : 1000
+        collectionViewHeightConstraint?.constant = cell.tableView.contentSize.height
+        collectionView.collectionViewLayout.invalidateLayout()
+        scrollView.contentSize = CGSize(width: view.frame.width, height: imageView.frame.height / 2 + (collectionViewHeightConstraint?.constant ?? 0))
+    }
+    
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 10
+        return 4
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -95,14 +104,6 @@ class MainCollectionViewController: UIViewController, UIScrollViewDelegate, UICo
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: collectionView.frame.width, height: collectionViewHeightConstraint?.constant ?? 1000)
-    }
-    
-    func updateHeightOfRow(_ cell: MainCollectionViewCell, _ tableView: UITableView) {
-        let size = cell.tableView.contentSize
-        let height = size.height > 0 ? size.height : 1000
-        collectionViewHeightConstraint?.constant = height
-        collectionView.collectionViewLayout.invalidateLayout()
-        scrollView.contentSize = CGSize(width: view.frame.width, height: imageView.frame.height + (collectionViewHeightConstraint?.constant ?? 0))
     }
     
 }
