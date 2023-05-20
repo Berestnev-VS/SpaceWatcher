@@ -17,32 +17,52 @@ class MainCollectionViewCell: UICollectionViewCell, UITableViewDataSource, UITab
     
     weak var delegate: MainCollectionViewCellDelegate?
     
-    let headerCollectionView = CollectionViewTableHeaderView() 
+    let headerCollectionView = CollectionViewTableHeaderView()
+    
+    let showLaunchButton: UIButton = {
+        let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.backgroundColor = .darkGray
+        button.setTitleColor(.white, for: .normal)
+        button.layer.cornerRadius = 8
+        button.layer.cornerCurve = .continuous
+        button.setTitle("Посмотреть запуски", for: .normal)
+        button.titleLabel?.font = .boldSystemFont(ofSize: 18)
+        return button
+    }()
     
     var tableView: UITableView = {
-        let tableView = UITableView(frame: .zero, style: .insetGrouped)
-//        tableView.translatesAutoresizingMaskIntoConstraints = false
+        let tableView = UITableView(frame: .zero, style: .grouped)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.register(DataTableViewCell.self, forCellReuseIdentifier: DataTableViewCell.identifier)
         tableView.isScrollEnabled = false
+        tableView.allowsSelection = false
         return tableView
     }()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         addSubview(tableView)
-        tableView.frame = contentView.frame
+        addSubview(showLaunchButton)
+//        tableView.frame = contentView.frame
         tableView.delegate = self
         tableView.dataSource = self
         
-//        setupConstraints()
+        setupConstraints()
     }
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: topAnchor),
-            tableView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            tableView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            tableView.topAnchor.constraint(equalTo: topAnchor, constant:  0),
+            tableView.bottomAnchor.constraint(equalTo: showLaunchButton.topAnchor, constant:  30),
+            tableView.leadingAnchor.constraint(equalTo: leadingAnchor, constant:  0),
+            tableView.trailingAnchor.constraint(equalTo: trailingAnchor, constant:  0),
+            
+            showLaunchButton.centerXAnchor.constraint(equalTo: centerXAnchor),
+            showLaunchButton.leadingAnchor.constraint(equalTo: leadingAnchor,constant: 50),
+            showLaunchButton.trailingAnchor.constraint(equalTo: trailingAnchor,constant: -50),
+            showLaunchButton.heightAnchor.constraint(equalToConstant: 50),
+            showLaunchButton.bottomAnchor.constraint(equalTo: bottomAnchor, constant: 0)
         ])
     }
     
@@ -53,7 +73,9 @@ class MainCollectionViewCell: UICollectionViewCell, UITableViewDataSource, UITab
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         switch section {
         case 0:
-            return headerCollectionView
+//            let view = UIView(frame: CGRect(x: 0, y: 0, width: tableView.contentSize.width, height: tableView.contentSize.height / 4))
+//            view.backgroundColor = .blue
+            return nil
         default: 
             return nil
         }
@@ -82,7 +104,7 @@ class MainCollectionViewCell: UICollectionViewCell, UITableViewDataSource, UITab
         let cell = tableView.dequeueReusableCell(withIdentifier: DataTableViewCell.identifier, for: indexPath) as! DataTableViewCell
         cell.descriptionLabel.text = "This cell is"
         cell.valueLabel.text = "\(indexPath.row)"
-        cell.backgroundColor = .systemGreen
+        cell.backgroundColor = .black
         return cell
     }
     

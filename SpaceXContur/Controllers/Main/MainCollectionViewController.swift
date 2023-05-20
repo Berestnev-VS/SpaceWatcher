@@ -19,7 +19,7 @@ class MainCollectionViewController: UIViewController, UICollectionViewDelegate, 
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.image = UIImage(named: "falcon")
-        imageView.contentMode = .scaleAspectFill // added this line to make image fit the imageView
+        imageView.contentMode = .scaleAspectFill 
         return imageView
     }()
     
@@ -27,6 +27,7 @@ class MainCollectionViewController: UIViewController, UICollectionViewDelegate, 
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.backgroundColor = .clear
+//        scrollView.bounces = false
         return scrollView
     }()
     
@@ -34,10 +35,18 @@ class MainCollectionViewController: UIViewController, UICollectionViewDelegate, 
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.clipsToBounds = true
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.register(MainCollectionViewCell.self, forCellWithReuseIdentifier: MainCollectionViewCell.identifier)
         collectionView.backgroundColor = .clear
         return collectionView
+    }()
+    
+    let footerView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .black
+        return view
     }()
     
     override func viewDidLoad() {
@@ -47,6 +56,7 @@ class MainCollectionViewController: UIViewController, UICollectionViewDelegate, 
         collectionView.dataSource = self
         view.addSubview(imageView)
         view.addSubview(scrollView)
+        scrollView.addSubview(footerView)
         scrollView.addSubview(collectionView)
         
         setupConstraints()
@@ -68,7 +78,12 @@ class MainCollectionViewController: UIViewController, UICollectionViewDelegate, 
             collectionView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
             collectionView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
-            collectionView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor)
+            collectionView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: view.safeAreaInsets.bottom),
+            
+            footerView.leadingAnchor.constraint(equalTo: collectionView.leadingAnchor),
+            footerView.trailingAnchor.constraint(equalTo: collectionView.trailingAnchor),
+            footerView.topAnchor.constraint(equalTo: collectionView.bottomAnchor),
+            footerView.heightAnchor.constraint(equalToConstant: 150)
         ])
         
         collectionViewHeightConstraint = collectionView.heightAnchor.constraint(equalToConstant: 1000) // starting value
@@ -77,10 +92,10 @@ class MainCollectionViewController: UIViewController, UICollectionViewDelegate, 
     
     
     func updateHeightOfRow(_ cell: MainCollectionViewCell, _ tableView: UITableView) {
-        let height = cell.tableView.contentSize.height
+        let height = cell.tableView.contentSize.height + cell.showLaunchButton.frame.size.height + 50
         collectionViewHeightConstraint?.constant = height
         collectionView.collectionViewLayout.invalidateLayout()
-        scrollView.contentSize = CGSize(width: view.frame.width, height: view.frame.height / 2 + height)
+        scrollView.contentSize = CGSize(width: view.frame.width, height: view.frame.height / 2 + height + cell.showLaunchButton.frame.height)
     }
 
     
@@ -92,14 +107,15 @@ class MainCollectionViewController: UIViewController, UICollectionViewDelegate, 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MainCollectionViewCell.identifier, for: indexPath) as! MainCollectionViewCell
         cell.delegate = self
-//        cell.backgroundColor = .systemPink
-//        cell.layer.cornerRadius = 14
-//        cell.layer.cornerCurve = .continuous
+        cell.clipsToBounds = true
+        cell.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        cell.layer.cornerRadius = 24
+        cell.layer.cornerCurve = .continuous
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: collectionView.frame.width, height: collectionViewHeightConstraint?.constant ?? 1000)
+        return CGSize(width: collectionView.frame.width, height: collectionView.frame.height)
     }
     
 }
