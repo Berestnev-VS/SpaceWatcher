@@ -8,7 +8,7 @@
 import UIKit
 
 
-class MainCollectionViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, MainCollectionViewCellDelegate {
+class MainCollectionViewController: UIViewController, UICollectionViewDelegateFlowLayout, MainCollectionViewCellDelegate {
     
     override var prefersStatusBarHidden: Bool { 
         return true
@@ -28,7 +28,7 @@ class MainCollectionViewController: UIViewController, UICollectionViewDelegate, 
         scrollView.contentInsetAdjustmentBehavior = .never
         scrollView.backgroundColor = .clear
         scrollView.showsVerticalScrollIndicator = false
-//        scrollView.bounces = false
+        //        scrollView.bounces = false
         return scrollView
     }()
     
@@ -37,6 +37,7 @@ class MainCollectionViewController: UIViewController, UICollectionViewDelegate, 
         layout.scrollDirection = .horizontal
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.clipsToBounds = true
+        collectionView.showsHorizontalScrollIndicator = false
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.register(MainCollectionViewCell.self, forCellWithReuseIdentifier: MainCollectionViewCell.identifier)
         collectionView.backgroundColor = .clear
@@ -79,9 +80,15 @@ class MainCollectionViewController: UIViewController, UICollectionViewDelegate, 
         ])
     }
     
-    override func viewDidLayoutSubviews() {
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if let flowLayout = self.collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
+            flowLayout.itemSize = CGSize(width: self.collectionView.frame.width, height: self.collectionView.frame.height)
+            flowLayout.invalidateLayout()
+        }
+        self.scrollView.contentSize = CGSize(width: self.view.frame.width, height: self.view.frame.height / 2 + self.collectionView.frame.height - 350) 
+        
     }
-
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let y = scrollView.contentOffset.y
@@ -90,6 +97,13 @@ class MainCollectionViewController: UIViewController, UICollectionViewDelegate, 
             imageView.transform = CGAffineTransform(scaleX: scale, y: scale)
         }
     }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: collectionView.frame.width, height: collectionView.frame.height)
+    }
+}
+
+extension MainCollectionViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return 4
@@ -104,9 +118,49 @@ class MainCollectionViewController: UIViewController, UICollectionViewDelegate, 
         return cell
     }
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        scrollView.contentSize = CGSize(width: view.frame.width, height: view.frame.height / 2 + collectionView.frame.height - 350) 
-        return CGSize(width: collectionView.frame.width, height: collectionView.frame.height)
+//    func snapToCenter() {
+//        let centerPoint = view.convert(view.center, to: collectionView)
+//        guard let centerIndexPath = collectionView.indexPathForItem(at: centerPoint) else { return }
+//        collectionView.scrollToItem(at: centerIndexPath, at: .centeredHorizontally, animated: true)
+//      }
+
+}
+
+extension MainCollectionViewController: UICollectionViewDelegate {
+    
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        scrollToNearestVisibleCollectionViewCell()
+    }
+    
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        
+            scrollToNearestVisibleCollectionViewCell()
+        
+    }
+
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        scrollToNearestVisibleCollectionViewCell()
+    }
+
+    func scrollToNearestVisibleCollectionViewCell() {
+        let visibleCenterPositionOfScrollView = Float(collectionView.contentOffset.x + (self.collectionView.bounds.size.width / 2))
+        var closestCellIndex = -1
+        var closestDistance: Float = .greatestFiniteMagnitude
+        for i in 0..<collectionView.visibleCells.count {
+            let cell = collectionView.visibleCells[i]
+            let cellWidth = cell.bounds.size.width
+            let cellCenter = Float(cell.frame.origin.x + cellWidth / 2)
+            
+            // Now calculate closest cell
+            let distance: Float = fabsf(visibleCenterPositionOfScrollView - cellCenter)
+            if distance < closestDistance {
+                closestDistance = distance
+                closestCellIndex = collectionView.indexPath(for: cell)!.row
+            }
+        }
+        if closestCellIndex != -1 {
+            collectionView.scrollToItem(at: IndexPath(row: closestCellIndex, section: 0), at: .centeredHorizontally, animated: true)
+        }
     }
 
     
